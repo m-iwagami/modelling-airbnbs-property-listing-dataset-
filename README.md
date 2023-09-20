@@ -1,23 +1,3 @@
-###
-
-## Description of the project:
-
-- Build a framework to systematically train, tune, and evaluate models on several tasks that are tackled by the Airbnb team
-1.  Clean the data from 
-
-
-
-
-tabular_data.py: 
-remove_rows_with_missing_ratings()
-
-
- what it does, the aim of the project, and what you learned
-Installation instructions
-Usage instructions
-File structure of the project
-License information
-
 
 #  Modelling Airbnb's property listing dataset
     - A Data Science project from AiCore course
