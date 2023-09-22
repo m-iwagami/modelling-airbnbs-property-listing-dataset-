@@ -17,7 +17,7 @@ class LinearRegression:
         self.W = np.random.randn(n_features, 1) ## randomly initialise weight
         self.b = np.random.randn(1) ## randomly initialise bias
         
-    def __call__(self, X): # how do we calculate the output from an input in our model?
+    def __call__(self, X): 
         ypred = np.dot(X, self.W) + self.b
         return ypred # return prediction
     

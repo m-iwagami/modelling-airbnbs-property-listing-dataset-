@@ -33,32 +33,30 @@ def train_linear_regression_model(data_file):
     print(f"    Testing: {len(y_test)}")
 
 
+    np.random.seed(2)
 
-    #np.random.seed(2)
-#
-    #models = [
-    #    DecisionTreeRegressor(splitter="random"),
-    #    SVR(),
-    #    LinearRegression()
-    #]
-#
-    #for model in models:
-    #    model.fit(X_train, y_train)
-#
-    #    y_train_pred = model.predict(X_train)
-    #    y_validation_pred = model.predict(X_validation)
-    #    y_test_pred = model.predict(X_test)
-#
-    #    train_loss = mean_squared_error(y_train, y_train_pred)
-    #    validation_loss = mean_squared_error(y_validation, y_validation_pred)
-    #    test_loss = mean_squared_error(y_test, y_test_pred)
-#
-    #    print(
-    #        f"{model.__class__.__name__}: "
-    #        f"Train Loss: {train_loss} | Validation Loss: {validation_loss} | "
-    #        f"Test Loss: {test_loss}"
-    #    )
+    models = [
+        DecisionTreeRegressor(splitter="random"),
+        SVR(),
+        LinearRegression()
+    ]
 
+    for model in models:
+        model.fit(X_train, y_train)
+
+        y_train_pred = model.predict(X_train)
+        y_validation_pred = model.predict(X_validation)
+        y_test_pred = model.predict(X_test)
+
+        train_loss = mean_squared_error(y_train, y_train_pred)
+        validation_loss = mean_squared_error(y_validation, y_validation_pred)
+        test_loss = mean_squared_error(y_test, y_test_pred)
+
+        print(
+            f"{model.__class__.__name__}: "
+            f"Train Loss: {train_loss} | Validation Loss: {validation_loss} | "
+            f"Test Loss: {test_loss}"
+        )
 if __name__ == "__main__":
     data_file = "clean_tabular_data.csv"  # Replace with the actual file path
     train_linear_regression_model(data_file)
