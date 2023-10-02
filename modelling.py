@@ -7,6 +7,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 import math
+import itertools
 from tabular_data import load_airbnb
 
 
@@ -52,12 +53,27 @@ def train_linear_regression_model(data_file):
     print(f"Mean Squared Error: {mse}")
     print(f"R-squared (R2) Score: {r2}")
 
-def custom_tune_regression_model_hyperparameters(models, X_train, X_validation, X_test, y_train, y_validation, y_test, hyperparameters_dict):
+def custom_tune_regression_model_hyperparameters(model, X_train, X_validation, X_test, y_train, y_validation, y_test, hyperparameters_dict):
   '''
    return the best model, a dictionary of its best hyperparameter values, and a dictionary of its performance metrics
    
-   Parameters 
    '''
+  validation_RMSE = {}
+  validation_R2 = {}
+  model_hyperparameter_val = {}
+  model_val = {}
+
+
+  for hyperparameter_value in itertools.product(*hyperparameters_dict.value()):
+    hyperparameter = dict(zip(hyperparameters_dict.keys(), hyperparameter_value))
+    model.set_params(**hyperparameter)
+    model.fit(X, y)
+    score = model.score(X, y)
+    if score > best_score:
+          best_score = score
+          best_params = hyperparameter
+    return best_params, best_score
+
 
 
 if __name__=="__main__":
