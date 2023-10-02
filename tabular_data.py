@@ -20,7 +20,6 @@ def set_default_feature_values(df):
     df["beds"].fillna(1, inplace=True)
     df["bathrooms"].fillna(1, inplace=True)
     df["bedrooms"].fillna(1, inplace=True)
-    #df["Price_Night"].fillna(0, inplace=True)
     return df
 
 
@@ -29,7 +28,7 @@ def clean_tabular_data(raw_dataset):
     cleaned_dataset  = remove_rows_with_missing_ratings(raw_dataset)
     cleaned_dataset  = combine_description_strings(cleaned_dataset)
     cleaned_dataset  = set_default_feature_values(cleaned_dataset)
-    cleaned_dataset = cleaned_dataset.drop(columns = 'Unnamed: 19')
+    cleaned_dataset = cleaned_dataset.drop(columns = ['Unnamed: 19','url','ID','Category', 'Title','Location', 'Amenities','Description'])
     return(cleaned_dataset)
 
 def load_airbnb(data_file, label_column):
@@ -57,5 +56,6 @@ if __name__ == "__main__":
     raw_data = pd.read_csv("listing.csv")
     cleaned_dataset = clean_tabular_data(raw_data)
     cleaned_dataset.to_csv('clean_tabular_data.csv', index=False)
-    
+    print(cleaned_dataset.dtypes)
+    print(cleaned_dataset['Amenities'])
 
