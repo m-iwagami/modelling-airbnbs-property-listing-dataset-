@@ -497,7 +497,7 @@ guests,beds,bathrooms,Price_Night,Cleanliness_rating,Accuracy_rating,Communicati
 2,1.0,1.0,94,5.0,5.0,5.0,5.0,5.0,4.9,48.0,1
 12,10.0,4.0,364,5.0,5.0,5.0,5.0,5.0,5.0,72.0,5
 6,5.0,2.0,184,5.0,5.0,5.0,5.0,5.0,4.9,70.0,3
-Somerford Keynes England United Kingdom,6.0,4.0,3,200.0,4.8,4.9,5.0,4.8,4.9,4.7,https://www.airbnb.co.uk/rooms/49009981?adults=1&category_tag=Tag%3A677&children=0&infants=0&search_mode=flex_destinations_search&check_in=2022-04-18&check_out=2022-04-25&previous_page_section_name=1000&federated_search_id=0b044c1c-8d17-4b03-bffb-5de13ff710bc
+0,6.0,4.0,3,200.0,4.8,4.9,5.0,4.8,4.9,4.7,0
 6,5.0,1.5,163,5.0,4.9,4.9,4.9,4.9,4.9,37.0,3
 4,4.0,1.0,120,5.0,4.9,4.9,4.8,5.0,4.9,21.0,2
 4,3.0,2.0,143,5.0,5.0,5.0,4.9,5.0,4.8,51.0,2
