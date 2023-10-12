@@ -8,6 +8,7 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 import pandas as pd
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import SGDRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.pipeline import Pipeline
@@ -16,7 +17,10 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import GradientBoostingRegressor
 import numpy as np
+import os
 import math
+import joblib
+import json
 import itertools
 from tabular_data import load_airbnb
 
@@ -116,6 +120,7 @@ def custom_tune_regression_model_hyperparameters(model, X_train, X_validation, X
     Perform a grid search over hyperparameter values for a regression model.
 
     Parameters:
+
         model: The regression model.
         X_train, X_validation, X_test: Training, validation, and test feature sets.
         y_train, y_validation, y_test: Training, validation, and test target values.
@@ -153,29 +158,91 @@ def custom_tune_regression_model_hyperparameters(model, X_train, X_validation, X
     }
 
     return best_model, best_hyperparameters, performance_metrics
+def tune_regression_model_hyperparameters(X,y):
+    random_forest_model = RandomForestRegressor()
+    parameter_grid =  {
+        'n_estimators': [10, 50, 100],
+        'max_depth': [None, 10, 20],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4]
+    }
+    
+    grid_search = GridSearchCV(
+        estimator = random_forest_model,
+        param_grid = parameter_grid, 
+        cv=5,
+        scoring='neg_mean_squared_error'
+    )
+    grid_search.fit(X.values, y)
+    print(f"Training and tuning RandomForestRegressor...")
+    print("Best Hyperparameters:", grid_search.best_params_)
+    print("Best Score (Negative Mean Squared Error):", grid_search.best_score_)
 
-def main():
+def save_model(folder_name, best_model, best_hyperparameters, performance_metric):
+    regression_dir = 'modelling-airbnbs-property-listing-dataset-/models'
+    current_dir = os.path.dirname(os.getcwd())
+    regression_path = os.path.join(current_dir, regression_dir)
+    folder_name_dir = os.path.join(regression_path,folder_name)
+    folder_name_path = os.path.join(current_dir, folder_name_dir)
+    
+    # Save the model to a .joblib file
+    joblib.dump(best_model, os.path.join(folder_name_path,"model.joblib"))
+
+    #Save the hyperparameters to a JSON file
+    hyperparameters_filename = os.path.join(folder_name_path, "hyperparameters.json")
+    with open (hyperparameters_filename, 'w') as json_file:
+        json.dump(best_hyperparameters, json_file)
+    
+    #Save the metrics to a JSON file
+    metrics_filename = os.path.join(folder_name_path, "metrics.json")
+    with open (metrics_filename, 'w') as json_file:
+        json.dump(performance_metric, json_file)
+
+    return
+
+def evaluate_all_models(models, hyperparamaters_dict):
+    # Import and standarise data
+    data_file = "clean_tabular_data.csv"
+    X, y = import_and_standarised_data(data_file)
+    # Split data
+    X_train, X_validation, X_test, y_train, y_validation, y_test = split_data(X, y)
+
+    for i in range(models):
+        best_regression_model, best_hyperparameters_dict, performance_metrics = custom_tune_regression_model_hyperparameters(model[i], X_train, X_validation, X_test, y_train, y_validation, y_test, hyperparameters_dict[i])
+        
+        # Print Results
+        print(best_regression_model, best_hyperparameters_dict, performance_metrics)
+        
+        #Save the best model
+        folder_name= str(models[i])[0:-2]
+        save_model(folder_name, best_regression_model, best_hyperparameters_dict, performance_metrics)
+
+    return
+ 
+
+if __name__ == "__main__":
+
+
+if __name__ == "__main__":
     hyperparameters_dict = {
         'alpha': [0.01, 0.1, 1.0],
         'l1_ratio': [0.1, 0.3, 0.5],
         'max_iter': [100, 200, 300],
     }
-
+   
     data_file = "clean_tabular_data.csv"
     X, y = import_and_standarised_data(data_file)
     X_train, X_validation, X_test, y_train, y_validation, y_test = split_data(X, y)
-    
+    tune_regression_model_hyperparameters(X,y)
+
     # Create instances of model classes
-    models = [SGDRegressor()]
-#              , DecisionTreeRegressor(), RandomForestRegressor(), GradientBoostingRegressor()]
+    models = [SGDRegressor()] , DecisionTreeRegressor(), RandomForestRegressor(), GradientBoostingRegressor()]
 
     for model in models:
-        print(f"Training and tuning {model.__class__.__name__}...")
         best_model, best_hyperparameters, performance_metrics = custom_tune_regression_model_hyperparameters(model, X_train, X_validation, X_test, y_train, y_validation, y_test, hyperparameters_dict)
         
+        print(f"Training and tuning {best_model.__class__.__name__}...")
         # Print and/or store the best hyperparameters and performance metrics for each model.
-        print(f"Best Hyperparameters for {model.__class__.__name__}: {best_hyperparameters}")
-        print(f"Performance Metrics for {model.__class__.__name__}: {performance_metrics}")
-
-if __name__ == "__main__":
-    main()
+        print(f"Best Hyperparameters for {best_model.__class__.__name__}: {best_hyperparameters}")
+        print(f"Performance Metrics for {best_model.__class__.__name__}: {performance_metrics}")
+        save_model('regression', best_model, best_hyperparameters, performance_metrics)
