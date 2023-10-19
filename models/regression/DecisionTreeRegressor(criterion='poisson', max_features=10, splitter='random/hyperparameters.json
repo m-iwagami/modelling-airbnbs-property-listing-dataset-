@@ -1,0 +1,1 @@
+{"criterion": "friedman_mse", "splitter": "best", "max_features": 10}
