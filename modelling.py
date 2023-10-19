@@ -1,27 +1,20 @@
 
 import itertools
+import json
 import math
-from sklearn.metrics import mean_squared_error
-from sklearn.linear_model import SGDRegressor
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+import os
 import pandas as pd
+import joblib
+import numpy as np
+from joblib import load
 from sklearn import metrics
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.linear_model import SGDRegressor
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.ensemble import GradientBoostingRegressor
-import numpy as np
-import os
-import math
-import joblib
-import json
-import itertools
 from tabular_data import load_airbnb
 
 def import_and_standarised_data(data_file):
@@ -134,6 +127,8 @@ def custom_tune_regression_model_hyperparameters(model, X_train, X_validation, X
     best_model = None
     best_hyperparameters = None
     best_rmse = float('inf')
+    validation_R2 = []
+
 
     for hyperparameter_values in itertools.product(*hyperparameters_dict.values()):
         hyperparameters = dict(zip(hyperparameters_dict.keys(), hyperparameter_values))
@@ -141,6 +136,8 @@ def custom_tune_regression_model_hyperparameters(model, X_train, X_validation, X
         model = regression_model.fit(X_train, y_train)
         y_pred_val = model.predict(X_validation)
         rmse_val = math.sqrt(mean_squared_error(y_validation, y_pred_val))
+        validation_R2.append(metrics.r2_score(y_validation, y_pred_val))
+
 
         if rmse_val < best_rmse:
             best_model = model
@@ -150,14 +147,21 @@ def custom_tune_regression_model_hyperparameters(model, X_train, X_validation, X
     # Calculate RMSE on the test set for the best model
     y_pred_test = best_model.predict(X_test)
     rmse_test = math.sqrt(mean_squared_error(y_test, y_pred_test))
+    test_R2 = metrics.r2_score(y_test, y_pred_test)
+
 
     # Create a dictionary of performance metrics
     performance_metrics = {
-        "validation_RMSE": best_rmse,
-        "test_RMSE": rmse_test,
+        "validation_RMSE": rmse_test,
+        'R^2' : test_R2
     }
 
     return best_model, best_hyperparameters, performance_metrics
+
+    
+
+
+
 def tune_regression_model_hyperparameters(X,y):
     random_forest_model = RandomForestRegressor()
     parameter_grid =  {
@@ -179,12 +183,29 @@ def tune_regression_model_hyperparameters(X,y):
     print("Best Score (Negative Mean Squared Error):", grid_search.best_score_)
 
 def save_model(folder_name, best_model, best_hyperparameters, performance_metric):
-    regression_dir = 'modelling-airbnbs-property-listing-dataset-/models'
+    models_dir = 'modelling-airbnbs-property-listing-dataset-/models'
+
+# Create Models folder
+    current_dir = os.path.dirname(os.getcwd())
+    models_path = os.path.join(current_dir, models_dir)
+    if os.path.exists(models_path) == False:
+        os.mkdir(models_path)
+
+    # Create regression folder
+    regression_dir = 'modelling-airbnbs-property-listing-dataset-/models/regression'
     current_dir = os.path.dirname(os.getcwd())
     regression_path = os.path.join(current_dir, regression_dir)
+    if os.path.exists(regression_path) == False:
+        os.mkdir(regression_path)
+
+    # Create linear_regression folder
     folder_name_dir = os.path.join(regression_path,folder_name)
+    current_dir = os.path.dirname(os.getcwd())
     folder_name_path = os.path.join(current_dir, folder_name_dir)
-    
+    if os.path.exists(folder_name_path) == False:
+        os.mkdir(folder_name_path)
+
+
     # Save the model to a .joblib file
     joblib.dump(best_model, os.path.join(folder_name_path,"model.joblib"))
 
@@ -207,45 +228,92 @@ def evaluate_all_models(models, hyperparamaters_dict):
     # Split data
     X_train, X_validation, X_test, y_train, y_validation, y_test = split_data(X, y)
 
-    for i in range(models):
-        best_regression_model, best_hyperparameters_dict, performance_metrics = custom_tune_regression_model_hyperparameters(model[i], X_train, X_validation, X_test, y_train, y_validation, y_test, hyperparameters_dict[i])
+    for i in range(len(models)):
+        best_regression_model, best_hyperparameters_dict, performance_metrics = custom_tune_regression_model_hyperparameters(models[i], X_train, X_validation, X_test, y_train, y_validation, y_test, hyperparameters_dict[i])
         
         # Print Results
         print(best_regression_model, best_hyperparameters_dict, performance_metrics)
         
         #Save the best model
         folder_name= str(models[i])[0:-2]
+       
+
         save_model(folder_name, best_regression_model, best_hyperparameters_dict, performance_metrics)
 
     return
  
-def find_best_model():
-    pass
+def find_best_model(models):
+    best_regression_model = None
+    best_hyperparameters_dict = {}
+    best_metrics_dict = {}
+    
+    regression_dir = "modelling-airbnbs-property-listing-dataset-/models/regression"
+    current_dir = os.path.dirname(os.getcwd())
+    regression_path = os.path.join(current_dir, regression_dir)
 
-
-if __name__ == "__main__":
-
-
-if __name__ == "__main__":
-    hyperparameters_dict = {
-        'alpha': [0.01, 0.1, 1.0],
-        'l1_ratio': [0.1, 0.3, 0.5],
-        'max_iter': [100, 200, 300],
-    }
-   
-    data_file = "clean_tabular_data.csv"
-    X, y = import_and_standarised_data(data_file)
-    X_train, X_validation, X_test, y_train, y_validation, y_test = split_data(X, y)
-    tune_regression_model_hyperparameters(X,y)
-
-    # Create instances of model classes
-    models = [SGDRegressor()] , DecisionTreeRegressor(), RandomForestRegressor(), GradientBoostingRegressor()]
-
-    for model in models:
-        best_model, best_hyperparameters, performance_metrics = custom_tune_regression_model_hyperparameters(model, X_train, X_validation, X_test, y_train, y_validation, y_test, hyperparameters_dict)
+    for i in range(len(models)):
+        model_str = str(models[i])[0:-2]
+        model_dir = os.path.join(regression_path, model_str)
+        model = load(os.path.join(model_dir, 'model.joblib'))
+        with open (os.path.join(model_dir, 'hyperparameters.json'),'r') as hyperparameters_path:
+            hyperparameters = json.load(hyperparameters_path)
         
-        print(f"Training and tuning {best_model.__class__.__name__}...")
-        # Print and/or store the best hyperparameters and performance metrics for each model.
-        print(f"Best Hyperparameters for {best_model.__class__.__name__}: {best_hyperparameters}")
-        print(f"Performance Metrics for {best_model.__class__.__name__}: {performance_metrics}")
-        save_model('regression', best_model, best_hyperparameters, performance_metrics)
+        with open(os.path.join(model_dir, 'metrics.json'), 'r') as metrics_path:
+            metrics = json.load(metrics_path)
+
+        if best_regression_model is None or metrics.get("R^2") > best_metrics_dict.get("R^2"):
+            best_regression_model = model
+            best_hyperparameters_dict = hyperparameters
+            best_metrics_dict = metrics
+
+    return best_regression_model, best_hyperparameters_dict, best_metrics_dict
+
+
+models = [SGDRegressor(), DecisionTreeRegressor(), RandomForestRegressor(), GradientBoostingRegressor()]
+
+hyperparameters_dict = [{ #SGDRegressor Hyperparameters (Selection)
+
+    'loss':['squared_error','huber', 'squared_epsilon_insensitive'],
+    'penalty':['l2', 'l1', 'elasticnet'],
+    'alpha':[0.0001, 0.001],
+    'l1_ratio':[0.15, 0.2],
+    'fit_intercept':[True, False],
+    'max_iter' :[1000],
+    'shuffle' :[True, False],
+    'early_stopping':[True, False]
+
+},
+                        { # DecisionTreeRegressor Hyperparameters (Selection)
+    'criterion':['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
+    'splitter':['best', 'random'],
+    'max_features':[10]
+
+},
+                        { # RandomForestRegressor Hyperparameters (Selection)
+    'n_estimators':[50, 100,],
+    'criterion':['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
+    'bootstrap':[True, False],
+    'max_features':[10]
+},
+
+                        { # GradientBoostingRegressor Hyperparameters (Selection)
+    'loss':['squared_error','huber'],
+    'learning_rate':[0.1, 0.2, 0.5],
+    'n_estimators':[50, 100, 200,],
+    'criterion':['squared_error', 'friedman_mse'],
+    'max_features':[10],
+
+}]
+
+if __name__ == "__main__":
+
+    evaluate_all_models(models, hyperparameters_dict)
+    best_regression_model, best_hyperparameters_dict, best_metrics_dict = find_best_model(models)
+    
+    print("Best Regression Model:")
+    print(best_regression_model)
+    print("Hyperparameters:")
+    print(best_hyperparameters_dict)
+    print("Metrics:")
+    print(best_metrics_dict)
+
