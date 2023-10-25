@@ -81,7 +81,13 @@ def split_data(X, y):
     return X_train, X_validation, X_test, y_train, y_validation, y_test
 
 def train_linear_regression_model(X_train, X_validation, X_test, y_train, y_validation, y_test):
+    """
+    Trains a linear regression model and evaluates its performance.
 
+    Parameters:
+        X_train, X_validation, X_test (pandas.core.frame.DataFrame): DataFrames containing the features for training, validation, and testing.
+        y_train, y_validation, y_test (pandas.core.series.Series): Series containing the targets/labels.
+    """
     linear_regression_model_SDGRegr = SGDRegressor()
     model = linear_regression_model_SDGRegr.fit(X_train, y_train)
 
@@ -124,6 +130,8 @@ def custom_tune_regression_model_hyperparameters(model, X_train, X_validation, X
         best_hyperparameters: A dictionary of the best hyperparameter values.
         performance_metrics: A dictionary of performance metrics.
     """
+
+
     best_model = None
     best_hyperparameters = None
     best_rmse = float('inf')
@@ -163,6 +171,29 @@ def custom_tune_regression_model_hyperparameters(model, X_train, X_validation, X
 
 
 def tune_regression_model_hyperparameters(X,y):
+    """
+    Tune the hyperparameters of the Random Forest Regression model using grid search.
+
+    Parameters:
+        X (pandas.core.frame.DataFrame): Features of the dataset.
+        y (pandas.core.series.Series): Target labels of the dataset.
+
+    This function performs a grid search over various hyperparameter combinations for the Random Forest Regression model
+    to find the best set of hyperparameters.
+
+    The hyperparameter grid consists of:
+    - 'n_estimators': Number of trees in the forest.
+    - 'max_depth': Maximum depth of the trees.
+    - 'min_samples_split': Minimum number of samples required to split an internal node.
+    - 'min_samples_leaf': Minimum number of samples required to be at a leaf node.
+
+    The best hyperparameters and the corresponding negative mean squared error score are printed.
+
+    Note: The 'cv' parameter in GridSearchCV determines the number of folds for cross-validation.
+
+    Returns:
+        None
+    """
     random_forest_model = RandomForestRegressor()
     parameter_grid =  {
         'n_estimators': [10, 50, 100],
@@ -183,9 +214,24 @@ def tune_regression_model_hyperparameters(X,y):
     print("Best Score (Negative Mean Squared Error):", grid_search.best_score_)
 
 def save_model(folder_name, best_model, best_hyperparameters, performance_metric):
+    """
+    Save the best regression model, its hyperparameters, and performance metrics to files.
+
+    Parameters:
+        folder_name (str): The name of the folder to save the model.
+        best_model: The best-trained regression model.
+        best_hyperparameters (dict): A dictionary of the best hyperparameter values.
+        performance_metric (dict): A dictionary of performance metrics.
+
+    This function saves the best-trained regression model to a .joblib file, the best hyperparameters to a JSON file,
+    and the performance metrics to another JSON file in the specified folder.
+
+    Returns:
+        None
+    """
     models_dir = 'modelling-airbnbs-property-listing-dataset-/models'
 
-# Create Models folder
+    # Create Models folder
     current_dir = os.path.dirname(os.getcwd())
     models_path = os.path.join(current_dir, models_dir)
     if os.path.exists(models_path) == False:
@@ -222,6 +268,22 @@ def save_model(folder_name, best_model, best_hyperparameters, performance_metric
     return
 
 def evaluate_all_models(models, hyperparamaters_dict):
+    """
+    Evaluate multiple regression models with different hyperparameter combinations.
+
+    Parameters:
+        models (list): List of regression models to evaluate.
+        hyperparameters_dict (list of dict): List of dictionaries containing hyperparameter grids for each model.
+
+    This function evaluates each regression model in the 'models' list with a range of hyperparameter combinations
+    specified in 'hyperparameters_dict'. It performs grid search for each model and stores the best model, its
+    hyperparameters, and performance metrics in separate folders.
+
+    Returns:
+        None
+    """
+    
+
     # Import and standarise data
     data_file = "clean_tabular_data.csv"
     X, y = import_and_standarised_data(data_file)
@@ -243,6 +305,20 @@ def evaluate_all_models(models, hyperparamaters_dict):
     return
  
 def find_best_model(models):
+    """
+    Find the best regression model among saved models.
+
+    Parameters:
+        models (list): List of regression models to evaluate.
+
+    This function searches for saved regression models in the specified folders, loads them, and compares their performance
+    metrics. It returns the best regression model, its hyperparameters, and the corresponding metrics.
+
+    Returns:
+        best_regression_model: The best-trained regression model.
+        best_hyperparameters_dict (dict): A dictionary of the best hyperparameter values.
+        best_metrics_dict (dict): A dictionary of performance metrics.
+    """
     best_regression_model = None
     best_hyperparameters_dict = {}
     best_metrics_dict = {}
