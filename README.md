@@ -34,7 +34,7 @@ Build a framework to systematically train, tune, and evaluate models on several 
 ### 2. Create a regression model
 #### modelling,py:
 1. import_and_standarised_data:Imports the data through the load_airbnb() function and then standardises it
-'\n'
+
 2. split_data: Splits the data into training, validating and testing data
 3. train_linear_regression_model: Trains a linear regression model and evaluates its performance.
 
