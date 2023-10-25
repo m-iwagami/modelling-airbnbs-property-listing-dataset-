@@ -33,9 +33,11 @@ Build a framework to systematically train, tune, and evaluate models on several 
 
 ### 2. Create a regression model
 #### modelling,py:
-1. import_and_standarised_data: Imports the data through the load_airbnb() function and then standardises it
+1. import_and_standarised_data:Imports the data through the load_airbnb() function and then standardises it
+'\n'
 2. split_data: Splits the data into training, validating and testing data
 3. train_linear_regression_model: Trains a linear regression model and evaluates its performance.
+
 4. custom_tune_regression_model_hyperparameters: Perform a grid search over hyperparameter values for a regression model.
 5. tune_regression_model_hyperparameters: Tune the hyperparameters of the Random Forest Regression model using grid search.
 6. save_model: Save the best regression model, its hyperparameters, and performance metrics to files.
