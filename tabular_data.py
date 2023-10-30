@@ -65,7 +65,7 @@ def clean_tabular_data(raw_dataset):
     cleaned_dataset = remove_rows_with_missing_ratings(raw_dataset)
     cleaned_dataset = combine_description_strings(cleaned_dataset)
     cleaned_dataset = set_default_feature_values(cleaned_dataset)
-    #cleaned_dataset = cleaned_dataset.drop(columns = ['Unnamed: 19','url','ID','Category', 'Title','Location', 'Amenities','Description'])
+    cleaned_dataset = cleaned_dataset.drop(columns = ['Unnamed: 19','url','ID','Category', 'Title','Location', 'Amenities','Description'])
     return(cleaned_dataset)
 
 def load_airbnb(data_file, label_column):
@@ -90,9 +90,14 @@ def load_airbnb(data_file, label_column):
     #features = data.drop(columns=[label_column])
     return features, labels
 
+def category_(raw_data):
+    labels = raw_data['Category']
+    return labels
 
 if __name__ == "__main__":
     raw_data = pd.read_csv("listing.csv")
-    cleaned_dataset = clean_tabular_data(raw_data)
-    cleaned_dataset.to_csv('clean_tabular_data.csv', index=False)
+    category = category_(raw_data)
+    category.to_csv('category.csv', index=False)
+    #cleaned_dataset = clean_tabular_data(raw_data)
+    #cleaned_dataset.to_csv('clean_tabular_data.csv', index=False)
     
