@@ -52,7 +52,7 @@ def logistic_regression(X,y):
     score = LogisticModel.score(X_test, y_test)
     return y_test, y_hat
 
-def classification_metrics(y_test, y_hat):
+def classification_metrics_performance(y_test, y_hat):
     accuracy = accuracy_score(y_test, y_hat)
     precision = precision_score(y_test, y_hat, average="macro")
     recall = recall_score(y_test, y_hat, average="macro")
@@ -76,6 +76,6 @@ if __name__ == "__main__":
     df = "listing.csv"
     X, y = import_and_standarise_data(df)
     y_test, y_hat = logistic_regression(X, y)
-    train_metrics = classification_metrics(y_test, y_hat)
+    train_metrics = classification_metrics_performance(y_test, y_hat)
 
 
