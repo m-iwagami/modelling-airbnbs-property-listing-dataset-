@@ -71,6 +71,8 @@ def classification_metrics_performance(y_test, y_hat):
     }
     return train_metrics
 
+def tune_classification_model_hyperparameters(model, X_train, X_validation, X_test, y_train, y_validation, y_test, hyperparameters_dict):
+    pass
 
 if __name__ == "__main__":
     df = "listing.csv"
