@@ -5,6 +5,8 @@ import sklearn
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from modelling_regression import split_data
+from sklearn.impute import SimpleImputer
+
 
 
 from tabular_data import load_airbnb
@@ -38,6 +40,9 @@ def import_and_standarise_data(data_file):
     std = StandardScaler()
     scaled_features = std.fit_transform(numeric_columns.values)
     X = pd.DataFrame(scaled_features, index=numeric_columns.index, columns=numeric_columns.columns)
+  # Replace Null value with mean imputation
+    imputer = SimpleImputer(strategy='mean')
+    X = imputer.fit_transform(X)
     return X,y
 
 
@@ -46,10 +51,10 @@ def logic_regression(X,y):
     X_train, X_validation, X_test, y_train, y_validation, y_test = split_data(X,y)
     logisticRegr = LogisticRegression()
     logisticRegr.fit(X_train, y_train)
-    #predictions = logisticRegr.predict(X_test)
-    #score = logisticRegr.score(X_test, y_test)
-    #print(f"Score: {score}"
-    #      f"Pridictions: {predictions}")
+    predictions = logisticRegr.predict(X_test)
+    score = logisticRegr.score(X_test, y_test)
+    print(f"Score: {score}"
+          f"Pridictions: {predictions}")
 
    
     
