@@ -1,16 +1,13 @@
 import numpy as np
 import math
 import pandas as pd
-import sklearn 
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, LinearRegression
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from modelling_regression import split_data
 from sklearn.impute import SimpleImputer
-
-
-
+from sklearn.metrics import f1_score
 from tabular_data import load_airbnb
-from tabular_data import remove_rows_with_missing_ratings
 
 def import_and_standarise_data(data_file):
     '''
@@ -46,20 +43,39 @@ def import_and_standarise_data(data_file):
     return X,y
 
 
-def logic_regression(X,y):
+def logistic_regression(X,y):
     
     X_train, X_validation, X_test, y_train, y_validation, y_test = split_data(X,y)
-    logisticRegr = LogisticRegression()
-    logisticRegr.fit(X_train, y_train)
-    predictions = logisticRegr.predict(X_test)
-    score = logisticRegr.score(X_test, y_test)
-    print(f"Score: {score}"
-          f"Pridictions: {predictions}")
+    LogisticModel = LogisticRegression(random_state=0, max_iter=10000).fit(X_train, y_train)
+    y_hat = LogisticModel.predict(X_test)
+    predictions = LogisticModel.predict(X_test)
+    score = LogisticModel.score(X_test, y_test)
+    return y_test, y_hat
 
-   
+def classification_metrics(y_test, y_hat):
+    accuracy = accuracy_score(y_test, y_hat)
+    precision = precision_score(y_test, y_hat, average="macro")
+    recall = recall_score(y_test, y_hat, average="macro")
+    f1 = f1_score(y_test, y_hat, average="macro")
+
+    print("Accuracy: ", accuracy)
+    print("Precision: ", precision)
+    print("Recall: ", recall)
+    print("F1: ", f1)
     
+    train_metrics = {
+        "Accuracy": accuracy,
+        "Precision": precision,
+        "Recall": recall,
+        "F1": f1
+    }
+    return train_metrics
+
 
 if __name__ == "__main__":
     df = "listing.csv"
     X, y = import_and_standarise_data(df)
-    logic_regression(X, y)
+    y_test, y_hat = logistic_regression(X, y)
+    train_metrics = classification_metrics(y_test, y_hat)
+
+
