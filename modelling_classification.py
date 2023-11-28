@@ -52,7 +52,7 @@ class ClassificationModel:
 
         Returns:
         - X: Features (standardized and imputed).
-        - y: Labels.
+        - y: Labels ("Category").
         """
         
        # Load the Airbnb data with "Category" as the label
@@ -264,8 +264,6 @@ def find_best_model(models):
             best_regression_model = model
             best_hyperparameters_dict = hyperparameters
             best_metrics_dict = metrics
-#
-    #print(best_regression_model, best_hyperparameters_dict, best_metrics_dict)
     return best_regression_model, best_hyperparameters_dict, best_metrics_dict
 
 def logistic_regression(X,y):
