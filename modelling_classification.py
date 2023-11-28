@@ -1,46 +1,60 @@
-import numpy as np
-import math
-import pandas as pd
 import itertools
+import json
+import math
+import matplotlib.pyplot as plt
+import numpy as np
 import os
+import pandas as pd
+from joblib import load
 import joblib
-import json 
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from modelling_regression import split_data
-from sklearn.model_selection import train_test_split
-
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import f1_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.tree import DecisionTreeClassifier
 from tabular_data import load_airbnb
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import confusion_matrix
-import matplotlib.pyplot as plt 
-from sklearn.metrics import ConfusionMatrixDisplay
+from modelling_regression import split_data
+
 
 class ClassificationModel:
+    """
+    A class for implementing and evaluating classification models for Airbnb property listing data.
+
+    Attributes:
+    - model: The classification model to be used (e.g., Logistic Regression, Decision Tree, etc.).
+
+    Methods:
+    - import_and_standarise_data(data_file): Load Airbnb data, handle missing values, and standardize numeric columns.
+    - splited_data(X, y): Split data into training, validation, and test sets.
+    - classification_metrics_performance(y_test, y_pred): Evaluate classification metrics (accuracy, precision, recall, F1 score).
+    - confusion_matrix(model, X_test, y_test, y_pred): Generate and display the confusion matrix for the model.
+    - tune_hyperparameters(model, X_train, X_val, X_test, y_train, y_val, y_test, hyperparameters): Perform hyperparameter tuning.
+    - save_classification_model(folder_name, result_dict): Save the best classification model, hyperparameters, and metrics.
+    - evaluate_model(model, hyperparameters_dict, folder_name): Evaluate a given classification model and save the results.
+    """
     def __init__(self, model):
+        """
+        Initialize the ClassificationModel instance.
+
+        Parameters:
+        - model: The classification model to be used.
+        """
         self.model  = model
         
     def import_and_standarise_data(self, data_file):
-        '''
-            Imports the data through the load_airbnb() function and then standardises it
+        """
+        Load Airbnb data, handle missing values, and standardize numeric columns.
 
-            Parameters
-            ----------
-            data_file
+        Parameters:
+        - data_file: The file containing Airbnb data.
 
-            Returns
-            -------
-            X: pandas.core.frame.DataFrame
-                A pandas DataFrame containing the features of the model
-
-            y: pandas.core.series.Series
-                A pandas series containing the targets/labels 
-          '''
+        Returns:
+        - X: Features (standardized and imputed).
+        - y: Labels.
+        """
+        
        # Load the Airbnb data with "Category" as the label
         label_column = "Category"
         X, y = load_airbnb(data_file, label_column)
@@ -54,6 +68,17 @@ class ClassificationModel:
         return X, y
     
     def splited_data(self, X,y):
+        """
+        Split data into training, validation, and test sets.
+
+        Parameters:
+        - X: Features.
+        - y: Labels.
+
+        Returns:
+        - X_train, X_validation, X_test: Features for training, validation, and testing.
+        - y_train, y_validation, y_test: Labels for training, validation, and testing.
+        """
         np.random.seed(10)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=12)
@@ -65,7 +90,16 @@ class ClassificationModel:
                 #80(train data) 10(validation) 10(test) 80(train data) 10(validation) 10(test) 
                 
     def classification_metrics_performance(self, y_test, y_pred):
-    
+        """
+        Evaluate classification metrics (accuracy, precision, recall, F1 score).
+
+        Parameters:
+        - y_test: True labels.
+        - y_pred: Predicted labels.
+
+        Returns:
+        - Dictionary containing accuracy, precision, recall, and F1 score.
+        """
         #Scores from testing a model
         accuracy = accuracy_score(y_test, y_pred)
         precision = precision_score(y_test, y_pred, average="macro")
@@ -81,6 +115,18 @@ class ClassificationModel:
         return train_metrics
     
     def confusion_matrix(model, X_test, y_test, y_pred):
+        """
+        Generate and display the confusion matrix for the model.
+
+        Parameters:
+        - model: The classification model.
+        - X_test: Features of the test set.
+        - y_test: True labels of the test set.
+        - y_pred: Predicted labels.
+
+        Returns:
+        - Confusion matrix display.
+        """
         #confusion matrix for a model 
         title = "Confusion matrix"
         disp_1 = ConfusionMatrixDisplay.from_estimator(model, X_test, y_test)
@@ -91,7 +137,18 @@ class ClassificationModel:
         return disp_1
 
     def tune_hyperparameters(self, model,X_train, X_val, X_test, y_train, y_val, y_test, hyperparameters):
-        
+        """
+        Perform hyperparameter tuning.
+
+        Parameters:
+        - model: The classification model.
+        - X_train, X_val, X_test: Features for training, validation, and testing.
+        - y_train, y_val, y_test: Labels for training, validation, and testing.
+        - hyperparameters: Dictionary of hyperparameters to be tuned.
+
+        Returns:
+        - Dictionary containing the best model, hyperparameters, and evaluation metrics.
+        """
         tuned_model = GridSearchCV(estimator=model, 
                                param_grid=hyperparameters, 
                                cv=5, 
@@ -112,17 +169,20 @@ class ClassificationModel:
         val_metrics = self.classification_metrics_performance(y_val, valid_y_pred)    
         test_metrics = self.classification_metrics_performance(y_test, y_pred)
                 
-        #nl = '\n'        
-        #print(f"Best Model: {best_classification_model}, {nl} Best Hyperparameters: {best_hyperparameters}, {nl} Best Metrics: {best_model_accuracy}, {nl} Train Metrics: {train_metrics}, {nl} validation Metrics: {val_metrics}, {nl} test Metrics: {test_metrics}")
-        
         result_dict = {"Best_Model":best_classification_model, "Best_Hyperparameters":best_hyperparameters, "Best_Metrics": best_model_accuracy, "Train_Metrics": train_metrics, "validation_Metrics":val_metrics, "test_Metrics":test_metrics}
         return result_dict
-
-    def save_model(self, result_dict):
-        model_dir = "/Users/momo/aicore/github/modelling-airbnbs-property-listing-dataset-/models/classification"
         
     def save_classification_model(self, folder_name, result_dict):
+        """
+        Save the best classification model, hyperparameters, and metrics.
 
+        Parameters:
+        - folder_name: Name of the folder to save the model in.
+        - result_dict: Dictionary containing the best model, hyperparameters, and metrics.
+
+        Returns:
+        - None
+        """
         classification_dir = 'modelling-airbnbs-property-listing-dataset-/models/classification'
         current_dir = os.path.dirname(os.getcwd())
         folder_path = os.path.join(current_dir, classification_dir)
@@ -150,7 +210,75 @@ class ClassificationModel:
 
         return
 
+    def evaluate_model(self, model, hyperparameters_dict, folder_name):
+        """
+        Evaluate a given classification model and save the results.
+
+        Parameters:
+        - model: The classification model.
+        - hyperparameters_dict: Dictionary of hyperparameters for tuning.
+        - folder_name: Name of the folder to save the results in.
+
+        Returns:
+        - None
+        """
+        df = "listing.csv"
+        X, y = self.import_and_standarise_data(df)
+        X_train, X_val, X_test, y_train, y_val, y_test = self.splited_data(X, y)
+        result_dict = self.tune_hyperparameters(model, X_train, X_val, X_test, y_train, y_val, y_test, hyperparameters_dict)
+        self.save_classification_model(folder_name, result_dict)
+
+        return
+
+def find_best_model(models):
+    """
+    Find the best classification model among a list of models.
+
+    Parameters:
+    - models: List of classification models.
+
+    Returns:
+    - Tuple containing the best model, hyperparameters, and evaluation metrics.
+    """
+    best_regression_model = None
+    best_hyperparameters_dict = {}
+    best_metrics_dict = {"Accuracy": 0, "Precision": 0, "Recall": 0, "F1": 0}
+    
+    clssification_dir = 'modelling-airbnbs-property-listing-dataset-/models/classification'
+    current_dir = os.path.dirname(os.getcwd())
+    folder_path = os.path.join(current_dir, clssification_dir)
+        
+    for i in range(len(models)):
+        model_str = str(models[i])[0:-2]
+        model_dir = os.path.join(folder_path, model_str)
+        model = load(os.path.join(model_dir, 'model.joblib'))
+        
+        with open (os.path.join(model_dir, 'hyperparameters.json'),'r') as hyperparameters_path:
+            hyperparameters = json.load(hyperparameters_path)
+        
+        with open(os.path.join(model_dir, 'metrics.json'), 'r') as metrics_path:
+            metrics = json.load(metrics_path)
+            metrics = metrics[2][1]
+            
+        if  best_hyperparameters_dict is None or round((metrics.get("Accuracy")),5) > best_metrics_dict.get("Accuracy"):
+            best_regression_model = model
+            best_hyperparameters_dict = hyperparameters
+            best_metrics_dict = metrics
+#
+    #print(best_regression_model, best_hyperparameters_dict, best_metrics_dict)
+    return best_regression_model, best_hyperparameters_dict, best_metrics_dict
+
 def logistic_regression(X,y):
+    """
+    Train a logistic regression model.
+
+    Parameters:
+    - X: Features.
+    - y: Labels.
+
+    Returns:
+    - Tuple containing true labels, predicted labels, the trained model, and features for testing.
+    """
     #Spliting Data
     X_train, X_test, y_train, y_test = train_test_split(X,y, test_size=0.1, random_state=0)
     
@@ -169,29 +297,28 @@ def logistic_regression(X,y):
     
 
 
-
+# Hyperparameters for different classification models
     
 LogisticRegression_param = {
-    'C': [1.0],
-    'class_weight': ['balanced',None],
-    'dual': [True, False],
-    'fit_intercept': [True, False],
-    'intercept_scaling': [1],
-    'max_iter': [50, 100],
-    'multi_class': ['auto', 'ovr', 'multinomial'],
-    'n_jobs': [None],
-    'penalty': ['l1', 'l2', 'elasticnet', None],
-    'random_state': [None],
-    'solver': ['lbfgs', 'liblinear', 'newton-cg', 'newton-cholesky', 'sag', 'saga'],
-    'tol': [0.0001],
-    'verbose': [0],
-    'warm_start': [True, False]
+'C': [1.0],
+'class_weight': ['balanced',None],
+'dual': [True, False],
+'fit_intercept': [True, False],
+'intercept_scaling': [1],
+'max_iter': [50, 100],
+'multi_class': ['auto', 'ovr', 'multinomial'],
+'n_jobs': [None],
+'penalty': ['l1', 'l2', 'elasticnet', None],
+'random_state': [None],
+'solver': ['lbfgs', 'liblinear', 'newton-cg', 'newton-cholesky', 'sag', 'saga'],
+'tol': [0.0001],
+'verbose': [0],
+'warm_start': [True, False]
 }
-DecisionTreeCLassifier_param = {#DecisionTreeCLassifier
+DecisionTreeCLassifier_param = {
 'max_depth': [1, 3, 5, None],
 'min_samples_split': [3, 5, 10],
 'random_state': [10, 20, None],
-#'criterion':['gini', 'entropy', 'log_loss'],
 'splitter': ['best', 'random'],
   }
 GardientBoostingClassifer_pram = {      
@@ -201,36 +328,38 @@ GardientBoostingClassifer_pram = {
 'criterion' : ['friedman_mse', 'squared_error']
   }
 RandomForestClassifier_pram = {
-      'criterion':['gini', 'entropy', 'log_loss'],
-      'max_depth': [0.1, 1, 3, None],
-      'min_samples_leaf' : [1,2,3],
-      'max_features' : ['sqrt', 'log2', None]
+'criterion':['gini', 'entropy', 'log_loss'],
+'max_depth': [0.1, 1, 3, None],
+'min_samples_leaf' : [1,2,3],
+'max_features' : ['sqrt', 'log2', None]
   } 
 
 
+# List of classification models
+
+models =[   DecisionTreeClassifier(),
+            LogisticRegression(),
+            GradientBoostingClassifier(),
+            RandomForestClassifier()]
 
 if __name__ == "__main__":
-    #model = DecisionTreeClassifier()
-    #model = LogisticRegression()
-    #model = GradientBoostingClassifier()
+
+    #Select model name    
+    model = DecisionTreeClassifier()
+    model = LogisticRegression()
+    model = GradientBoostingClassifier()
     model = RandomForestClassifier()
     
-    
-    classification = ClassificationModel(model)
-    df = "listing.csv"
-    X, y = classification.import_and_standarise_data(df)
-    X_train, X_val, X_test, y_train, y_val, y_test = classification.splited_data(X, y)
-    #result_dict = classification.tune_hyperparameters(model, X_train, X_val, X_test, y_train, y_val, y_test, DecisionTreeCLassifier_param)
-    #result_dict = classification.tune_hyperparameters(model, X_train, X_val, X_test, y_train, y_val, y_test, LogisticRegression_param)
-    #result_dict = classification.tune_hyperparameters(model, X_train, X_val, X_test, y_train, y_val, y_test, GardientBoostingClassifer_pram)
-    result_dict = classification.tune_hyperparameters(model, X_train, X_val, X_test, y_train, y_val, y_test, RandomForestClassifier_pram)
-
-    #folder_name = 'DecisionTreeClassifier'
-    #folder_name = 'LogisticRegression'
-    #folder_name = 'GradientBoostingClassifier'
+    #Select folder name
+    folder_name = 'DecisionTreeClassifier'
+    folder_name = 'LogisticRegression'
+    folder_name = 'GradientBoostingClassifier'
     folder_name = 'RandomForestClassifier'
     
-    classification.save_classification_model(folder_name, result_dict)
+    classification = ClassificationModel(model)
+    classification.evaluate_model(model, DecisionTreeCLassifier_param, folder_name)
+    
+    find_best_model(models)
 
 
     
