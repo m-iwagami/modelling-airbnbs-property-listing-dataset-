@@ -339,9 +339,12 @@ def find_best_model(models):
     return best_regression_model, best_hyperparameters_dict, best_metrics_dict
 
 
-models = [SGDRegressor(), DecisionTreeRegressor(), RandomForestRegressor(), GradientBoostingRegressor()]
+models = [SGDRegressor(), 
+          DecisionTreeRegressor(), 
+          RandomForestRegressor(), 
+          GradientBoostingRegressor()]
 
-hyperparameters_dict = [{ #SGDRegressor Hyperparameters (Selection)
+hyperparameters_dict = [{ #SGDRegressor Hyperparameters
 
     'loss':['squared_error','huber', 'squared_epsilon_insensitive'],
     'penalty':['l2', 'l1', 'elasticnet'],
@@ -353,20 +356,20 @@ hyperparameters_dict = [{ #SGDRegressor Hyperparameters (Selection)
     'early_stopping':[True, False]
 
 },
-                        { # DecisionTreeRegressor Hyperparameters (Selection)
+                        { # DecisionTreeRegressor Hyperparameters 
     'criterion':['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
     'splitter':['best', 'random'],
     'max_features':[10]
 
 },
-                        { # RandomForestRegressor Hyperparameters (Selection)
+                        { # RandomForestRegressor Hyperparameters
     'n_estimators':[50, 100,],
     'criterion':['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
     'bootstrap':[True, False],
     'max_features':[10]
 },
 
-                        { # GradientBoostingRegressor Hyperparameters (Selection)
+                        { # GradientBoostingRegressor Hyperparameters
     'loss':['squared_error','huber'],
     'learning_rate':[0.1, 0.2, 0.5],
     'n_estimators':[50, 100, 200,],
