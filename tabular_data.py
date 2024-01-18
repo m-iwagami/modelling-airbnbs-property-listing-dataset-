@@ -98,6 +98,6 @@ if __name__ == "__main__":
     raw_data = pd.read_csv("listing.csv")
     category = category_(raw_data)
     category.to_csv('category.csv', index=False)
-    #cleaned_dataset = clean_tabular_data(raw_data)
-    #cleaned_dataset.to_csv('clean_tabular_data.csv', index=False)
+    cleaned_dataset = clean_tabular_data(raw_data)
+    cleaned_dataset.to_csv('clean_tabular_data.csv', index=False)
     
