@@ -18,8 +18,11 @@ Build a framework to systematically train, tune, and evaluate models on several 
 
 
 ## Requirements
-- pip install requirements.txt
+- pip install -r requirements.txt
 - python3 
+
+## Github
+- https://github.com/m-iwagami/modelling-airbnbs-property-listing-dataset-
 
 ## Modules
 
@@ -76,6 +79,8 @@ To find the best classification model among a list of models, use the find_best_
 
 #### db_creds.yaml & my_db_creds.yaml:
 
+
+### Neural Network
 
 
 ## Libraries
