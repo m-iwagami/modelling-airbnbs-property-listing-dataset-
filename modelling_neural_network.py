@@ -169,8 +169,8 @@ def train_neural_network(model, train_dataloader, val_dataloader, nn_config, epo
         optimizer = torch.optim.SGD(model.parameters(), lr)
     elif nn_config['optimiser'] == "Adam":
         optimizer = torch.optim.Adam(model.parameters(), lr)
-    elif nn_config['optimiser'] == "SparseAdam":
-        optimizer = torch.optim.SparseAdam(model.parameters(), lr)
+    elif nn_config['optimiser'] == "RMSProp":
+        optimizer = torch.optim.RMSProp(model.parameters(), lr)
 
 
     criterion = nn.MSELoss() # Define the loss function
